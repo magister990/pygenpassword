@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pygenpassword"
+version = "0.1.0"
+authors = [
+  { name="Alex Scott", email="magister@kfa.cx" },
+]
+description = "A simple random password generator with cli tool and library."
+license = {file = "LICENSE"}
+readme = "README.md"
+requires-python = ">=3.8"
+keywords=["password", "generator"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/magister990/pygenpassword"
+Issues = "https://github.com/magister990/pygenpassword/issues"
+Repository = "https://github.com/magister990/pygenpassword.git"
