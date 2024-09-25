@@ -15,3 +15,4 @@
 #
 from .argument_enable_feature import ArgumentEnableFeature
 from .password_machine import PasswordMachine
+from .cli import main

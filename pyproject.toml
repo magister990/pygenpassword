@@ -23,3 +23,5 @@ classifiers = [
 Homepage = "https://github.com/magister990/pygenpassword"
 Issues = "https://github.com/magister990/pygenpassword/issues"
 Repository = "https://github.com/magister990/pygenpassword.git"
+[project.scripts]
+genpassword = "pygenpassword.cli:main"
