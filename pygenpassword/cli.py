@@ -38,7 +38,7 @@ def main():
 
     parser = ArgumentParser(description='A simple random password generator with cli tool and library.')
     parser.add_argument(
-        '-c',
+        '-l',
         '--length',
         metavar='<length>',
         help=f'Password Length (Default is {pm.password_length})'
