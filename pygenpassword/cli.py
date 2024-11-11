@@ -92,6 +92,9 @@ def main():
 
     args=parser.parse_args()
 
+    if args.length:
+        pm.password_length=int(args.length)
+
     if args.allow_repeat:
         pm.no_repeating_characters=False
     if args.min_chars_per:
