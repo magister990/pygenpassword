@@ -14,6 +14,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
+import sys
 from argparse import ArgumentParser, BooleanOptionalAction
 
 from pygenpassword import ArgumentEnableFeature, PasswordMachine
@@ -41,20 +42,20 @@ def main():
         '-l',
         '--length',
         metavar='<length>',
-        help=f'Password Length (Default is {pm.password_length})'
+        help=f'Password Length (Default: {pm.password_length})'
     )
     parser.add_argument(
         '-r',
         '--allow-repeat',
         action=ArgumentEnableFeature,
-        help='Allow repeating characters? (Default is False)'
+        help=f'Allow repeating characters? (Default: {not pm.no_repeating_characters})'
     )
     parser.add_argument(
         '-m',
         '--min-chars-per',
         metavar='<number>',
         type=int,
-        help=f'Minimum number of characters per class (Default is {pm.minimum_characters_per_class})'
+        help=f'Minimum number of characters per class (Default: {pm.minimum_characters_per_class})'
     )
     parser.add_argument(
         '-v',
@@ -73,7 +74,7 @@ def main():
         metavar='<class_name>',
         choices=['help'] + list(pm.character_classes.keys()),
         nargs='+',
-        help='List of character classes to use. Not compatiable with "add-class" and "remove-class". Use "help" to list all the character classes available.'
+        help=f'List of character classes to use. Not compatiable with "add-class" and "remove-class". Use "help" to list all the character classes available. (Default: {", ".join(pm.use_character_classes)})'
     )
     parser.add_argument(
         '--add-class',
