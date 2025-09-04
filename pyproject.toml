@@ -1,27 +1,27 @@
-[build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
-
-[project]
+[tool.poetry]
 name = "pygenpassword"
 version = "0.1.0"
-authors = [
-  { name="Alex Scott", email="magister@kfa.cx" },
-]
 description = "A simple random password generator with cli tool and library."
-license = {file = "LICENSE"}
+authors = ["Alex Scott <magister@kfa.cx>"]
+license = "Apache-2.0"
 readme = "README.md"
-requires-python = ">=3.8"
-keywords=["password", "generator"]
+homepage = "https://github.com/magister990/pygenpassword"
+repository = "https://github.com/magister990/pygenpassword.git"
+keywords = ["password", "generator"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
 ]
 
-[project.urls]
-Homepage = "https://github.com/magister990/pygenpassword"
-Issues = "https://github.com/magister990/pygenpassword/issues"
-Repository = "https://github.com/magister990/pygenpassword.git"
-[project.scripts]
+[tool.poetry.dependencies]
+python = "^3.8"
+
+[tool.poetry.group.dev.dependencies]
+
+[tool.poetry.scripts]
 genpassword = "pygenpassword.cli:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
