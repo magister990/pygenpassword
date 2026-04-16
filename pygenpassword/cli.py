@@ -14,118 +14,123 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
-import sys
-from argparse import ArgumentParser, BooleanOptionalAction
+from typing import Optional
 
-from pygenpassword import ArgumentEnableFeature, PasswordMachine
+import typer
 
-def print_machine_settings(password_machine):
-    print('Using Character Classes:', *tuple(password_machine.use_character_classes))
-    print('Password Length:', password_machine.password_length)
-    print('No Repeating Characters?', password_machine.no_repeating_characters)
-    print('Minimum characters per class:', password_machine.minimum_characters_per_class)
-    if password_machine.debug:
-        print('Debugging Enabled.')
+from pygenpassword.password_machine import PasswordMachine
 
-def print_all_classes(password_machine):
-    print('Available character classes')
-    for class_name in password_machine.character_classes:
-        spaces=' ' * (22 - len(class_name))
-        print(class_name, spaces, password_machine.character_classes[class_name])
-    exit()
+app = typer.Typer(add_completion=False)
+
 
 def main():
-    pm=PasswordMachine()
+    app()
 
-    parser = ArgumentParser(description='A simple random password generator with cli tool and library.')
-    parser.add_argument(
-        '-l',
-        '--length',
-        metavar='<length>',
-        help=f'Password Length (Default: {pm.password_length})'
-    )
-    parser.add_argument(
-        '-r',
-        '--allow-repeat',
-        action=ArgumentEnableFeature,
-        help=f'Allow repeating characters? (Default: {not pm.no_repeating_characters})'
-    )
-    parser.add_argument(
-        '-m',
-        '--min-chars-per',
-        metavar='<number>',
-        type=int,
-        help=f'Minimum number of characters per class (Default: {pm.minimum_characters_per_class})'
-    )
-    parser.add_argument(
-        '-v',
-        '--verbose',
-        action=ArgumentEnableFeature,
-        help='Display extra output?'
-    )
-    parser.add_argument(
-        '-d',
-        '--debug',
-        action=ArgumentEnableFeature,
-        help='Enable debugging?'
-    )
-    parser.add_argument(
-        '--use-class',
-        metavar='<class_name>',
-        choices=['help'] + list(pm.character_classes.keys()),
-        nargs='+',
-        help=f'List of character classes to use. Not compatiable with "add-class" and "remove-class". Use "help" to list all the character classes available. (Default: {", ".join(pm.use_character_classes)})'
-    )
-    parser.add_argument(
-        '--add-class',
-        metavar='<class_name>',
-        choices=['help'] + list(pm.character_classes.keys()),
-        nargs='+',
-        help='List of character classes to use. Not compatiable with "add-class" and "remove-class". Use "help" to list all the character classes available.'
-    )
-    parser.add_argument(
-        '--remove-class',
-        metavar='<class_name>',
-        choices=['help'] + list(pm.character_classes.keys()),
-        nargs='+',
-        help='List of character classes to use. Not compatiable with "add-class" and "remove-class". Use "help" to list all the character classes available.'
-    )
 
-    args=parser.parse_args()
+def print_machine_settings(pm: PasswordMachine):
+    typer.echo(f'Using Character Classes: {" ".join(pm.use_character_classes)}')
+    typer.echo(f'Password Length: {pm.password_length}')
+    typer.echo(f'No Repeating Characters? {pm.no_repeating_characters}')
+    typer.echo(f'Minimum characters per class: {pm.minimum_characters_per_class}')
+    if pm.debug:
+        typer.echo('Debugging Enabled.')
 
-    if args.length:
-        pm.password_length=int(args.length)
 
-    if args.allow_repeat:
-        pm.no_repeating_characters=False
-    if args.min_chars_per:
-        pm.minimum_characters_per_class=args.min_chars_per
+@app.command()
+def generate(
+    length: Optional[int] = typer.Option(
+        None, '-l', '--length',
+        metavar='LENGTH',
+        help='Password length (default: 12)',
+    ),
+    allow_repeat: bool = typer.Option(
+        False, '-r', '--allow-repeat',
+        is_flag=True,
+        help='Allow repeating characters',
+    ),
+    min_chars_per: Optional[int] = typer.Option(
+        None, '-m', '--min-chars-per',
+        metavar='NUMBER',
+        help='Minimum characters per class (default: 1)',
+    ),
+    use_class: Optional[list[str]] = typer.Option(
+        None, '--use-class',
+        metavar='CLASS',
+        help='Replace active classes entirely (repeat for multiple). Incompatible with --add-class / --remove-class.',
+    ),
+    add_class: Optional[list[str]] = typer.Option(
+        None, '--add-class',
+        metavar='CLASS',
+        help='Add a class to the active set (repeat for multiple)',
+    ),
+    remove_class: Optional[list[str]] = typer.Option(
+        None, '--remove-class',
+        metavar='CLASS',
+        help='Remove a class from the active set (repeat for multiple)',
+    ),
+    list_classes: bool = typer.Option(
+        False, '--list-classes',
+        is_flag=True,
+        help='List all available character classes and exit',
+    ),
+    verbose: bool = typer.Option(
+        False, '-v', '--verbose',
+        is_flag=True,
+        help='Display machine settings before generating',
+    ),
+    debug: bool = typer.Option(
+        False, '-d', '--debug',
+        is_flag=True,
+        help='Enable debug output (implies verbose)',
+    ),
+):
+    pm = PasswordMachine()
 
-    if args.use_class and 'help' in args.use_class:
-        print_all_classes(pm)
-    if args.add_class and 'help' in args.add_class:
-        print_all_classes(pm)
-    if args.remove_class and 'help' in args.remove_class:
-        print_all_classes(pm)
+    if list_classes:
+        typer.echo('Available character classes:')
+        for class_name, chars in pm.character_classes.items():
+            spaces = ' ' * (22 - len(class_name))
+            typer.echo(f'{class_name}{spaces}{chars}')
+        raise typer.Exit()
 
-    if args.use_class and (args.add_class or args.remove_class):
-        print('Option use error! "use-class" is not compatiable with "add-class" and "remove-class"')
-        exit(1)
+    valid_classes = set(pm.character_classes.keys())
+    for cls in (use_class or []) + (add_class or []) + (remove_class or []):
+        if cls not in valid_classes:
+            typer.echo(
+                f'Error: unknown class "{cls}". Run with --list-classes to see available classes.',
+                err=True,
+            )
+            raise typer.Exit(1)
 
-    if args.use_class:
-        pm.use_character_classes=args.use_class
+    if use_class and (add_class or remove_class):
+        typer.echo(
+            'Error: --use-class is not compatible with --add-class / --remove-class.',
+            err=True,
+        )
+        raise typer.Exit(1)
+
+    if length is not None:
+        pm.password_length = length
+    if allow_repeat:
+        pm.no_repeating_characters = False
+    if min_chars_per is not None:
+        pm.minimum_characters_per_class = min_chars_per
+
+    if use_class:
+        pm.use_character_classes = use_class
     else:
-        if args.add_class:
-            # TODO check if the added classes already exists.
-            pm.use_character_classes=pm.use_character_classes + args.add_class
-        if args.remove_class:
-            # TODO check if the removed classes are in the list.
-            pm.use_character_classes=[ class_name for class_name in pm.use_character_classes if class_name not in args.remove_class ]
+        if add_class:
+            pm.use_character_classes = pm.use_character_classes + add_class
+        if remove_class:
+            pm.use_character_classes = [c for c in pm.use_character_classes if c not in remove_class]
 
-    if args.use_class:
-        print('use_class', args.use_class)
-    if args.debug:
-        pm.debug=True
-    if args.verbose or args.debug:
+    if debug:
+        pm.debug = True
+    if verbose or debug:
         print_machine_settings(pm)
-    print(pm.generate())
+
+    result = pm.generate()
+    if result is None:
+        typer.echo('Failed to generate password after maximum attempts. Please retry.', err=True)
+        raise typer.Exit(1)
+    typer.echo(result)
