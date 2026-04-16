@@ -20,7 +20,7 @@ import typer
 
 from pygenpassword.password_machine import PasswordMachine
 
-app = typer.Typer(add_completion=False)
+app = typer.Typer()
 
 
 def main():
@@ -87,10 +87,11 @@ def generate(
     pm = PasswordMachine()
 
     if list_classes:
-        typer.echo('Available character classes:')
+        typer.echo('Available character classes (* = default):')
         for class_name, chars in pm.character_classes.items():
+            marker = '*' if class_name in pm.use_character_classes else ' '
             spaces = ' ' * (22 - len(class_name))
-            typer.echo(f'{class_name}{spaces}{chars}')
+            typer.echo(f' {marker} {class_name}{spaces}{chars}')
         raise typer.Exit()
 
     valid_classes = set(pm.character_classes.keys())
