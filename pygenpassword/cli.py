@@ -27,6 +27,11 @@ def main():
     app()
 
 
+def _complete_class_name(incomplete: str) -> list[str]:
+    pm = PasswordMachine()
+    return [name for name in pm.character_classes if name.startswith(incomplete)]
+
+
 def print_machine_settings(pm: PasswordMachine):
     typer.echo(f'Using Character Classes: {" ".join(pm.use_character_classes)}')
     typer.echo(f'Password Length: {pm.password_length}')
@@ -56,16 +61,19 @@ def generate(
     use_class: Optional[list[str]] = typer.Option(
         None, '--use-class',
         metavar='CLASS',
+        autocompletion=_complete_class_name,
         help='Replace active classes entirely (repeat for multiple). Incompatible with --add-class / --remove-class.',
     ),
     add_class: Optional[list[str]] = typer.Option(
         None, '--add-class',
         metavar='CLASS',
+        autocompletion=_complete_class_name,
         help='Add a class to the active set (repeat for multiple)',
     ),
     remove_class: Optional[list[str]] = typer.Option(
         None, '--remove-class',
         metavar='CLASS',
+        autocompletion=_complete_class_name,
         help='Remove a class from the active set (repeat for multiple)',
     ),
     list_classes: bool = typer.Option(
